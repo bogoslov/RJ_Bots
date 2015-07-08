@@ -506,7 +506,11 @@ class Utils(object):
                 week_clan_win = last_clan_win - int(user.get("last_clan_win"))
                 week_clan_play = last_clan_play - int(user.get("last_clan"))
                 week_rating = last_rating - int(user.get("last_rating"))
-                # print user.get("name").encode('utf-8'), week_clan_win, week_clan_play, week_rating
+                try:
+                    week_percentage = round(100 * float(week_clan_win) / week_clan_play , 2)
+                except:
+                    week_percentage = 0.0
+                    # print user.get("name").encode('utf-8'), week_clan_win, week_clan_play, week_rating
                 db.upsert_data(table="STATISTICS", data={"UID": uid,
                                                          "NAME": user.get("name").encode('utf-8'),
                                                          "LAST_CLAN_WIN": last_clan_win,
@@ -515,7 +519,7 @@ class Utils(object):
                                                          "WEEK_CLAN_WIN": week_clan_win,
                                                          "WEEK_CLAN": week_clan_play,
                                                          "WEEK_RATING": week_rating,
-                                                         "WEEK_PERCENTAGE": round(100 * float(week_clan_win) / week_clan_play , 2)})
+                                                         "WEEK_PERCENTAGE": week_percentage})
         except Exception, err:
             print err
             self.logger.error("Error during update weekly clan statistic:\n<%s>" % err)
@@ -606,7 +610,6 @@ class Utils(object):
             for clan_id in clans:
                 current.extend([item.keys()[0] for item in self.get_clan_participant(clan_id)])  # Get clan participant from game
 
-
             saved = self.get_available("DYNAMIC")                                                # Get saved clan participant
 
             for item in list(set(saved) - set(current)):
@@ -637,7 +640,7 @@ class Utils(object):
             db.upsert_data(table="PARTICIPANT", data={"UID": uid, "AUTH": auth, "TYPE": ptype, "DAILY_MERC": daily})
             info = self.get_user_information(uid)
             db.upsert_data(table="STATISTICS", data={"UID": uid,
-                                                     "NAME": info.get("name"),
+                                                     "NAME": info.get("name").encode('utf-8'),
                                                      "LAST_RATING": int(info.get("detail_info", {}).get("rating", 0)),
                                                      "LAST_CLAN": int(info.get("statistic", {}).get("clan_pvp_tournament_play_item", 0)),
                                                      "LAST_CLAN_WIN": int(info.get("statistic", {}).get("clan_pvp_tournament_win_item", 0))})

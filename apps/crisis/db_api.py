@@ -177,8 +177,6 @@ class DB_API(object):
                 cursor = self.connection.cursor()
             if condition:
                 condition = "WHERE %s" % condition
-
-            print condition
             cursor.execute("DELETE FROM %s %s" % (table, condition))
             self.connection.commit()
         except Exception, err:
