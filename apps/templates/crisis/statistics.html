@@ -1,0 +1,47 @@
+{% extends "crisis/base.html" %}
+{% block header %}
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span6">
+                <table class="table" class="table-bordered" style="text-align: center">
+                    <thead>
+                        <tr>
+                            <th rowspan="2"></th>
+                            <th colspan="2">КВ победы/участие</th>
+                            <th colspan="2">Рейтинг</th>
+                            <th rowspan="2" style="vertical-align: middle">Эфф-сть КВ</th>
+                        </tr>
+                        <tr>
+                            <th>Всего</th>
+                            <th>За неделю</th>
+                            <th>Всего</th>
+                            <th>За неделю</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in statistics %}
+                            {% if user.week_clan_win >= 18 %}
+                                <tr class="success">
+                            {% elif user.week_clan_win >= 10 %}
+                                <tr class="warning">
+                            {% else %}
+                                <tr class="error">
+                            {% endif %}
+                                    <td>{{ user.name }}</td>
+                                    <td>{{ user.last_clan_win }} / {{ user.last_clan }}</td>
+                                    <td>{{ user.week_clan_win }} / {{ user.week_clan }}</td>
+                                    <td>{{ user.last_rating }}</td>
+                                    <td>{{ user.week_rating }}</td>
+                                    <td>{{ user.week_percentage }}</td>
+                                </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

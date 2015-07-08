@@ -1,0 +1,27 @@
+{% extends "ancient/base.html" %}
+{#{% load staticfiles %}#}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span6">
+                    {% if error %}
+                        <div class="alert alert-error">
+                            <button class="close" data-dismiss="alert" type="button">?</button>
+                            <h4>Error!</h4>
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                    <form method="POST" class="form-inline">
+                        {% csrf_token %}
+                        <input name="uid" type="text" placeholder="Enter uid">
+                        <input name="auth" type="text" placeholder="Enter auth key">
+                        <button name="run" type="submit" class="btn btn-success">Run Daemons</button>
+                    </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+

@@ -1,0 +1,179 @@
+{% extends "crisis/base.html" %}
+{% load staticfiles %}
+{% load crisis_filters %}
+{#{% block header %}#}
+{#{% endblock %}#}
+{% block content %}
+    <div class="container-fluid">
+        {% if is_run %}
+            <div class="alert alert-success" role="alert">
+{#                <span style="margin-left: 15em">Next activity after: {{ left_time }} second(s)</span>#}
+                <span style="margin-left: 15em">Next activity after: <strong>{{ left_time }}</strong></span>
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <button title="Click to show/hide details" type="button" class="btn btn-large btn-block btn-info" onclick="if(document.getElementById('detail') .style.display=='none') {document.getElementById('detail') .style.display=''}else{document.getElementById('detail') .style.display='none'}">
+                <span style="font-family: fantasy; font-size:22px">User Detail Info</span>
+            </button>
+            <div class="row-fluid" id="detail" style="display:none">
+                <div class="span10">
+                    <table class="table" class="table-bordered" style="text-align: center">
+                        <tbody >
+                            <tr>
+                                {% for item in detail_info_list %}
+                                    <td><img src="{{ STATIC_URL }}img/crisis/detail_info/{{ item }}_64x64.png" alt="{{ item|capfirst }}"></td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                {% for item in detail_info_list %}
+                                    <td>{{ detail_info|get_item:item }}</td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <button title="Click to show/hide details" type="button"  class="btn btn-large btn-block btn-info" onclick="if(document.getElementById('resource') .style.display=='none') {document.getElementById('resource') .style.display=''}else{document.getElementById('resource') .style.display='none'}">
+                <span style="font-family: fantasy; font-size:22px">Resources</span>
+            </button>
+            <div class="row-fluid" id="resource" style="display:''">
+                <div class="span6">
+                    <table class="table" class="table-bordered" style="text-align: center">
+                        <tbody >
+                            <tr>
+                                <td><img src="{% static "img/crisis/resources/money_64x64.png" %}" alt="Money"></td>
+                                <td><img src="{% static "img/crisis/resources/food_64x64.png" %}" alt="Food"></td>
+                                <td><img src="{% static "img/crisis/resources/fuel_64x64.png" %}" alt="Fuel"></td>
+                            </tr>
+                            <tr>
+                                <td>{{ resource.money }}</td>
+                                <td>{{ resource.food }}</td>
+                                <td>{{ resource.fuel }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <button title="Click to show/hide details" type="button"  class="btn btn-large btn-block btn-info" onclick="if(document.getElementById('entity') .style.display=='none') {document.getElementById('entity') .style.display=''}else{document.getElementById('entity') .style.display='none'}">
+                <span style="font-family: fantasy; font-size:22px">Entity</span>
+            </button>
+            <div class="row-fluid" id="entity" style="display:none">
+                <div class="span9">
+                    <table class="table" class="table-bordered" style="text-align: center">
+                        <tbody >
+                        <tr>
+                            {% for item in entity_list %}
+                                <td><img src="{{ STATIC_URL }}img/crisis/entity/{{ item }}_64x64.png" alt="{{ item|capfirst }}"></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            {% for item in entity_list %}
+                                <td>{{ entity|get_item:item }}</td>
+                            {% endfor %}
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <button title="Click to show/hide details" type="button"  class="btn btn-large btn-block btn-info" onclick="if(document.getElementById('parts') .style.display=='none') {document.getElementById('parts') .style.display=''}else{document.getElementById('parts') .style.display='none'}">
+                <span style="font-family: fantasy; font-size:22px">Parts</span>
+            </button>
+            <div class="row-fluid" id="parts" style="display:none">
+                <div class="span15">
+                    <table class="table" class="table-bordered" style="text-align: center">
+                        <tbody >
+                        <tr>
+                            {% for item in parts_list %}
+                                <td><img src="{{ STATIC_URL }}img/crisis/parts/{{ item }}_64x64.png" alt="{{ item|capfirst }}"></td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            {% for item in parts_list %}
+                                <td>{{ parts|get_item:item }}</td>
+                            {% endfor %}
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <button title="Click to show/hide details" type="button"  class="btn btn-large btn-block btn-info" onclick="if(document.getElementById('army') .style.display=='none') {document.getElementById('army') .style.display=''}else{document.getElementById('army') .style.display='none'}">
+                <span style="font-family: fantasy; font-size:22px">Army</span>
+            </button>
+            <div class="row-fluid" id="army" style="display:none">
+                <div class="span9">
+                    <table class="table" class="table-bordered" style="text-align: center">
+                        <tbody >
+                            <tr>
+                                <td colspan="2"><span style="font-family: fantasy; font-size:15px; color: dimgrey">Infantry</span></td>
+                                <td colspan="2"><span style="font-family: fantasy; font-size:15px; color: dimgrey">Armor</span></td>
+                                <td colspan="4"><span style="font-family: fantasy; font-size:15px; color: dimgrey">Support</span></td>
+                            </tr>
+                            <tr>
+                                <td><img src="{% static "img/crisis/infantry/soldier_64x64.png" %}" alt="Soldier"><span class="label label-success">{{ current_army.soldier }}</span></td>
+                                <td><input name="soldier" type="text" placeholder="{{ order.soldier }}"></td>
+{#                                <td></td>#}
+                                <td><img src="{% static "img/crisis/armor/base_tank_64x64.png" %}" alt="Tank"><span class="label label-success">{{ current_army.base_tank }}</span></td>
+                                <td><input name="base_tank" type="text" placeholder="{{ order.base_tank }}"></td>
+                                <td><img src="{% static "img/crisis/support/base_artillery_64x64.png" %}" alt="Base Artillery"><span class="label label-success">{{ current_army.base_artillery }}</span></td>
+                                <td><input name="base_artillery" type="text" placeholder="{{ order.base_artillery }}"></td>
+                            </tr>
+                            <tr>
+                                <td><img src="{% static "img/crisis/infantry/gunner_64x64.png" %}" alt="Gunner"><span class="label label-success">{{ current_army.gunner }}</span></td>
+                                <td><input name="gunner" type="text" placeholder="{{ order.gunner }}"></td>
+                                <td><img src="{% static "img/crisis/armor/jeep_64x64.png" %}" alt="Jeep"><span class="label label-success">{{ current_army.jeep }}</span></td>
+                                <td><input name="jeep" type="text" placeholder="{{ order.jeep }}"></td>
+                                <td><img src="{% static "img/crisis/support/artillery_64x64.png" %}" alt="Artillery"><span class="label label-success">{{ current_army.artillery }}</span></td>
+                                <td><input name="artillery" type="text" placeholder="{{ order.artillery }}"></td>
+                            </tr>
+                            <tr>
+                                <td><img src="{% static "img/crisis/infantry/sniper_64x64.png" %}" alt="Sniper"><span class="label label-success">{{ current_army.sniper }}</span></td>
+                                <td><input name="sniper" type="text" placeholder="{{ order.sniper }}"></td>
+                                <td></td>
+                                <td></td>
+                                <td><img src="{% static "img/crisis/support/artillery_cassete_64x64.png" %}" alt="Artillery Cassete"><span class="label label-success">{{ current_army.artillery_cassete }}</span></td>
+                                <td><input name="artillery_cassete" type="text" placeholder="{{ order.artillery_cassete }}"></td>
+                            </tr>
+                            <tr>
+                                <td><img src="{% static "img/crisis/infantry/thrower_64x64.png" %}" alt="Thrower"><span class="label label-success">{{ current_army.thrower }}</span></td>
+                                <td><input name="thrower" type="text" placeholder="{{ order.thrower }}"></td>
+                                <td></td>
+                                <td></td>
+                                <td><img src="{% static "img/crisis/support/artillery_emp_64x64.png" %}" alt="Artillery EMP"><span class="label label-success">{{ current_army.artillery_emp }}</span></td>
+                                <td><input name="artillery_emp" type="text" placeholder="{{ order.artillery_emp }}"></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td><img src="{% static "img/crisis/support/artillery_antitank_64x64.png" %}" alt="Artillery Antitank"><span class="label label-success">{{ current_army.artillery_antitank }}</span></td>
+                                <td><input name="artillery_antitank" type="text" placeholder="{{ order.artillery_antitank }}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="span2 offset1">
+                    <br>
+                    <br>
+                    <div class="alert alert-success">
+                        Запчасти для производства войск будут создаваться автоматически,
+                        если их недостаточно для создания выбранного типа войск
+                    </div>
+                </div>
+
+            </div>
+            <hr>
+            {% if is_run %}
+                <button type="submit" name="start" class="btn btn-success" disabled>Start</button>
+                <button type="submit" name="stop" class="btn btn-danger">Stop</button>
+            {% else %}
+                <button type="submit" name="start" class="btn btn-success">Start</button>
+                <button type="submit" name="stop" class="btn btn-danger" disabled>Stop</button>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}

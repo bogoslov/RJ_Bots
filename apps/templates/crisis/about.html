@@ -1,0 +1,28 @@
+{% extends "crisis/base.html" %}
+{% block header %}
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid span12">
+        <div class="hero-unit">
+            <h3>Purpose:</h3>
+            <span>Bot for game Кризис!</span><br>
+            <a href="http://vk.com/war_crisis">ВКонтакте</a><br>
+            <a href="http://ok.ru/game/crisis">Одноклассники</a><br>
+            <a href="http://my.mail.ru/apps/721413">Мой Мир</a><br>
+            <a href="http://crisis-game.ru/">Браузерная Версия</a><br>
+            <br>
+            <h3>Authors:</h3>
+            {% for author in authors %}
+            <address>
+                <strong>{{ author.0 }}</strong>
+                <br>
+                <span>{{ author.2 }}</span>
+                <br>
+{#                <a href="mailto:{{ author.1 }}">{{ author.1 }}</a>#}
+            </address>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

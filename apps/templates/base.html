@@ -1,0 +1,54 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="shortcut icon" href="{% static "img/crisis_icon.png" %}">
+        <title>Crisis Bot</title>
+        {#    used css files declaration    #}
+        <link href="{% static "css/bootstrap.css"%}" rel="stylesheet">
+        <link href="{% static "css/bootstrap-toggle.css"%}" rel="stylesheet">
+        <link href="{% static "css/bootstrap-toggle-animated.css"%}" rel="stylesheet">
+        <link href="{% static "css/bootstrap-select.css"%}" rel="stylesheet">
+
+        {#    used javascript files declaration    #}
+        <script src="{% static "js/jquery.js" %}"></script>
+        <script src="{% static "js/bootstrap-transition.js"%}"></script>
+        <script src="{% static "js/bootstrap-alert.js"%}"></script>
+        <script src="{% static "js/bootstrap-toggle.js"%}"></script>
+        <script src="{% static "js/bootstrap-select.js"%}"></script>
+    </head>
+
+    <body style="padding-top: 70px; padding-bottom: 25px">
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="brand" href="/crisis/">Crisis Bot</a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav">
+                            <li class="/bundle-viewer/active/">
+                                <a href="/crisis/">
+                                    <i class="icon-home icon-white"></i>
+                                    <span>Home</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/crisis/about/">
+                                    <i class="icon-user icon-white"></i>
+                                    <span> About</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% block content %}
+        {% endblock %}
+        {% block footer %}
+        {% endblock %}
+    </body>
+
+
+</html>

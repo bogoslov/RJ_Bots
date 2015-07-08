@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div class="span5">
+                {% if error %}
+                    <div class="alert alert-error">
+                        <button class="close" data-dismiss="alert" type="button">×</button>
+                        <h4>Error!</h4>
+                        {{ message }}
+                    </div>
+                {% endif %}
+                <form method="POST" class="form-inline">
+                    {% csrf_token %}
+                    <input name="auth_key" type="text" placeholder="Enter new auth key">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+

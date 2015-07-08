@@ -1,0 +1,47 @@
+{% extends "crisis/base.html" %}
+{% load staticfiles %}
+{#{% block header %}#}
+{#{% endblock %}#}
+{% block content %}
+    <div class="container-fluid">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row-fluid">
+                <div class="span6">
+                    <select name="city" class="selectpicker">
+                        {% for region_id, cities_info in cities.items %}
+                            <optgroup label="{{ regions|get_item:region_id }}">
+                                {% for city_id, city_name in cities_info.items %}
+                                    {% if selected_city == region_id|concatenate:"_"|concatenate:city_id %}
+                                        <option selected="selected" value="{{ region_id }}_{{ city_id }}">{{ city_name }}</option>
+                                    {% else %}
+                                        <option value="{{ region_id }}_{{ city_id }}">{{ city_name }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                        {% endfor %}
+                    </select>
+                    <br>
+                    {% if is_attack %}
+                        <button type="submit" name="start" class="btn btn-success" disabled>Start</button>
+                        <button type="submit" name="stop" class="btn btn-danger">Stop</button>
+                    {% else %}
+                        <button type="submit" name="start" class="btn btn-success" onclick="">Start</button>
+                        <button type="submit" name="stop" class="btn btn-danger" disabled>Stop</button>
+                    {% endif %}
+                </div>
+
+                <div class="span3 offset1">
+                    <br>
+                    <div class="alert alert-success">
+{#                        <button class="close" data-dismiss="alert" type="button">?</button><br>#}
+                        Для увеличения шансов на успешную атаку, рекомендуется отключать автоматический сбор ресурсов/изготовление войск
+                        либо рассчитывать время таким образом, что бы время сбора ресурсов и время атаки на город не совпадали
+                        <br>
+                        <strong>ВАЖНО!</strong> Предназначено только для первой атаки на город
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "crisis/base.html" %}
+{% load staticfiles %}
+{#{% block header %}#}
+{#{% endblock %}#}
+{% block content %}
+    <div class="container-fluid">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row-fluid">
+                <div class="span6">
+                    <table class="table" class="table-bordered" style="text-align: center">
+                        <tbody>
+                            <tr>
+                                <td  colspan="6"><span style="font-family: fantasy; font-size:22px; color: dimgrey">Daily Mercenary</span></td>
+                            </tr>
+                            <tr>
+                                {% for merc in mercs %}
+                                    <td><img src="{{ STATIC_URL }}img/crisis/daily/mercenary_us_{{ merc }}_64x64.png" alt="{{ merc|capfirst }}"></td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                {% for merc in mercs %}
+                                    {% if merc == daily_merc %}
+                                        <td style="text-align: center"><input type="radio" name="daily_merc" value="{{ merc }}" checked></td>
+                                    {% else %}
+                                        <td><input type="radio" name="daily_merc" value="{{ merc }}"></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td  colspan="6"><span style="font-family: fantasy; font-size:22px; color: dimgrey">Schemas</span></td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="text-align:center">
+                                    <img src="{{ STATIC_URL }}img/crisis/daily/daily_schema.png" alt="DAILY SCHEMA"><br>
+                                    {% if daily_schema %}
+                                        <input type="checkbox" name="daily_schema" value="receive" checked="">
+                                    {% else %}
+                                        <input type="checkbox" name="daily_schema" value="receive">
+                                    {% endif %}
+                                </td>
+                                <td colspan="3" style="text-align:center">
+                                    <img src="{{ STATIC_URL }}img/crisis/daily/event_schema.png" alt="EVENT SCHEMA"><br>
+                                    {% if event_schema %}
+                                        <input type="checkbox" name="event_schema" value="receive" checked="">
+                                    {% else %}
+                                        <input type="checkbox" name="event_schema" value="receive">
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="6"><span style="font-family: fantasy; font-size:22px; color: dimgrey">Group and Plugin Presents</span></td>
+                            </tr>
+                            <tr>
+                                <td colspan="6" style="text-align:center">
+                                    <img src="{{ STATIC_URL }}img/crisis/daily/present.png" alt="GROUP|PLUGIN PRESENT"><br>
+                                    {% if group_plugin %}
+                                        <input type="checkbox" name="group_plugin" value="gather" checked="">
+                                    {% else %}
+                                        <input type="checkbox" name="group_plugin" value="gather">
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="6" style="text-align:center"><button type="submit" name="save" class="btn btn-success">Save</button></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="span3 offset1">
+                    <br>
+                    <div class="alert alert-success">
+{#                        <button class="close" data-dismiss="alert" type="button">×</button><br>#}
+                        Выполнение ежедневного задания (10 золота и наёмник) и рассылка чертежей происходит в период с <strong>03:00 - 03:30</strong>.
+                        <br>
+                        Во избежания возникновения проблем, в этот отрезок времени не заходите в игру и не вступайте в бои
+                    </div>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <div class="alert alert-success">
+{#                        <button class="close" data-dismiss="alert" type="button">×</button><br>#}
+                        Автоматический сбор подарков из группы и плагина происходит в период с <strong>15:00 - 15:30</strong>.
+                        <br>
+                        Во избежания возникновения проблем, в этот отрезок времени не заходите в игру и не вступайте в бои
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <form method="POST">
+                {% csrf_token %}
+                <a style="float: right;" href="."><i class="icon-refresh"></i></a>
+                <div class="span5">
+                    <table class="table" class="display">
+                        <tbody>
+                            <tr>
+                                <td colspan="10">
+                                    <center>
+                                    <img src="{% static "img/tech.jpg" %}" alt="Technology Level" width="30px" height="30px">
+                                    {{ technology }}
+                                    <img src="{% static "img/leader.jpg" %}" alt="Leader Level" width="30px" height="30px">
+                                    {{ leader }}
+                                    <img src="{% static "img/liga.jpg" %}" alt="Liga" width="30px" height="30px">
+                                    {{ liga }}
+                                    </center>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {% if krone.check %}
+                                        <input type="checkbox" name="krone" class="checkbox" checked/>
+                                    {% else %}
+                                        <input type="checkbox" name="krone" class="checkbox"/>
+                                    {% endif %}
+                                </td>
+                                <td><img src="{% static "img/krone.jpg" %}" width="30px" height="30px" alt="Krone"></td>
+                                <td>Krone</td>
+                                <td>{{ krone.count }}</td>
+                                <td></td><td></td><td></td>
+                                <td>
+                                    {% if beggars.check %}
+                                        <input type="checkbox" name="beggars" class="checkbox" checked/>
+                                    {% else %}
+                                        <input type="checkbox" name="beggars" class="checkbox"/>
+                                    {% endif %}
+                                </td>
+                                <td><img src="{% static "img/beggar.jpg" %}" width="30px" height="30px" alt="Beggars"></td>
+                                <td>Beggars</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {% if wood.check %}
+                                        <input type="checkbox" name="wood" class="checkbox" checked/>
+                                    {% else %}
+                                        <input type="checkbox" name="wood" class="checkbox"/>
+                                    {% endif %}
+                                </td>
+                                <td><img src="{% static "img/wood.jpg" %}" width="30px" height="30px" alt="Wood"></td>
+                                <td>Wood</td>
+                                <td>{{ wood.count }} / {{ wood.max }}</td>
+                                <td></td><td></td><td></td>
+                                <td>
+                                    {% if thieves.check %}
+                                        <input type="checkbox" name="thieves" class="checkbox" checked/>
+                                    {% else %}
+                                        <input type="checkbox" name="thieves" class="checkbox"/>
+                                    {% endif %}
+                                </td>
+                                <td><img src="{% static "img/thieve.jpg" %}" width="30px" height="30px" alt="Thieves"></td>
+                                <td>Thieves</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {% if stone.check %}
+                                        <input type="checkbox" name="stone" class="checkbox" checked/>
+                                    {% else %}
+                                        <input type="checkbox" name="stone" class="checkbox"/>
+                                    {% endif %}
+                                </td>
+                                <td><img src="{% static "img/stone.jpg" %}" width="30px" height="30px" alt="Stone"></td>
+                                <td>Stone</td>
+                                <td>{{ stone.count }} / {{ stone.max }}</td>
+                                <td></td><td></td><td></td>
+
+                                <td>
+                                    {% if ghost.check %}
+                                        <input type="checkbox" name="ghost" class="checkbox" checked/>
+                                    {% else %}
+                                        <input type="checkbox" name="ghost" class="checkbox"/>
+                                    {% endif %}
+                                </td>
+                                <td><img src="{% static "img/ghost.jpg" %}" width="30px" height="30px" alt="Ghost"></td>
+                                <td>Ghost</td>
+
+                            </tr>
+                            <tr>
+                                <td>
+                                    {% if iron.check %}
+                                        <input type="checkbox" name="iron" class="checkbox" checked/>
+                                    {% else %}
+                                        <input type="checkbox" name="iron" class="checkbox"/>
+                                    {% endif %}
+                                </td>
+                                <td><img src="{% static "img/iron.jpg" %}" width="30px" height="30px" alt="Iron"></td>
+                                <td>Iron</td>
+                                <td>{{ iron.count }} / {{ iron.max }}</td>
+                                <td></td><td></td><td></td>
+
+                                <td>
+                                    {% if chocolate.check %}
+                                    <input type="checkbox" name="chocolate" class="checkbox" checked/>
+                                    {% else %}
+                                    <input type="checkbox" name="chocolate" class="checkbox"/>
+                                    {% endif %}
+                                </td>
+                                <td><img src="{% static "img/chocolate.jpg" %}" width="30px" height="30px" alt="Chocolate"></td>
+                                <td>Chocolate</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {% if food.check %}
+                                        <input type="checkbox" name="food" class="checkbox" checked/>
+                                    {% else %}
+                                        <input type="checkbox" name="food" class="checkbox"/>
+                                    {% endif %}
+                                </td>
+                                <td><img src="{% static "img/food.jpg" %}" width="30px" height="30px" alt="Food"></td>
+                                <td>Food</td>
+                                <td>{{ food.count }} / {{ food.max }}</td>
+                            </tr>
+                            <tr>
+                                <td> </td>
+                                <td><img src="{% static "img/rune.jpg" %}" width="30px" height="30px" alt="Rune"></td>
+                                <td>Rune</td>
+                                <td>{{ rune.count }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="submit" name="save" class="btn btn-info">Save</button>
+                    {% if run %}
+                        <button type="submit" name="start" class="btn btn-success" disabled>Start</button>
+                        <button type="submit" name="stop" class="btn btn-danger">Stop</button>
+                    {% else %}
+                        {% if avail %}
+                            <button type="submit" name="start" class="btn btn-success">Start</button>
+                        {% else %}
+                            <button type="submit" name="start" class="btn btn-success" disabled>Start</button>
+                        {% endif %}
+                        <button type="submit" name="stop" class="btn btn-danger" disabled>Stop</button>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+{% endblock %}
+
+
+

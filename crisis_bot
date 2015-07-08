@@ -1,0 +1,43 @@
+#!/bin/bash
+# chkconfig: 345 90 10
+# description: Crisis Bot
+
+# Source function library.
+. /etc/init.d/functions
+
+CRISIS_PATH=/opt/Crisis_Bot
+CRISIS_BIN=$CRISIS_PATH/crisis/runserver.py
+CRISIS_PID=/var/run/crisis_bot.pid
+
+start() {
+        echo -n $"Starting Crisis Bot: "
+        PYTHONPATH=$PYTHONPATH:/opt; export PYTHONPATH
+        $CRISIS_BIN
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && echo_success
+        [ $RETVAL -ne 0 ] && echo_failure
+        echo
+pgrep -f $CRISIS_BIN > $CRISIS_PID
+}
+
+stop() {
+        echo -n $"Shutting Crisis Bot: "
+        killproc -p $CRISIS_PID 2>&1
+        echo
+}
+
+case "$1" in
+    start)
+        $1
+        ;;
+    stop)
+        $1
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 2
+esac

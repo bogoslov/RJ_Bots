@@ -1,0 +1,68 @@
+{% extends "crisis/base.html" %}
+{% load staticfiles %}
+{#{% block header %}#}
+{#{% endblock %}#}
+{% block content %}
+    <div class="container-fluid">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row-fluid">
+                <div class="span8">
+                    <table class="table" class="table-bordered" style="text-align: center">
+                        <tbody>
+                        <tr>
+                            <td colspan="8"><span style="font-family: fantasy; font-size:15px; color: dimgrey">Trade House Products</span></td>
+                        </tr>
+                        {% for slicer in slicer_list %}
+                            <tr>
+                                {% for entity in entities|get_slice:slicer %}
+                                    {% if entity == "soldier_gun" or entity == "gunner_gun" %}
+                                        <td colspan="2"><img src="{{ STATIC_URL }}img/crisis/parts/{{ entity }}_64x64.png" alt="{{ entity|capfirst }}"></td>
+                                    {% else %}
+                                        <td colspan="2"><img src="{{ STATIC_URL }}img/crisis/entity/{{ entity }}_64x64.png" alt="{{ entity|capfirst }}"></td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                {% for entity in entities|get_slice:slicer %}
+                                    <td style="text-align:right">
+                                        <img src="{{ STATIC_URL }}img/crisis/resources/money_64x64.png" height="32" width="32" alt="Money"><br>
+                                        {% if "money" in entity_order|get_item:entity %}
+                                            <input type="checkbox" name="{{ entity }}@money" value="buy" checked="">
+                                        {% else %}
+                                            <input type="checkbox" name="{{ entity }}@money" value="buy">
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align:left">
+                                        <img src="{{ STATIC_URL }}img/crisis/resources/gold_64x64.png" height="32" width="32" alt="Gold"><br>
+                                        {% if "gold" in entity_order|get_item:entity %}
+                                            <input type="checkbox" name="{{ entity }}@gold" value="buy" checked="">
+                                        {% else %}
+                                            <input type="checkbox" name="{{ entity }}@gold" value="buy">
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                        <tr colspan="8">
+                            <td colspan="8" style="text-align:center"><button type="submit" name="save" class="btn btn-success">Save</button></td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="span3 offset1">
+                    <br>
+                    <div class="alert alert-success">
+                        Раз в 4 часа осуществляется попытка скупить продукты в Контрабанде.
+                        <br>
+                        <strong>ВАЖНО!</strong> Работает только при активированном сборе ресурсов на вкладке ORDER
+{#                        Выполнение ежедневного задания (10 золота и наёмник) и рассылка чертежей происходит в период с <strong>03:00 - 03:30</strong>.#}
+{#                        <br>#}
+{#                        Во избежания возникновения проблем, в этот отрезок времени не заходите в игру и не вступайте в бои#}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock %}
