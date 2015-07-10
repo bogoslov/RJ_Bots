@@ -6,6 +6,10 @@ Created: 11.08.2014
 Author:  Aleksey Bogoslovskyi
 """
 
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 import urllib2
 import logging
 from time import sleep, time
@@ -16,7 +20,6 @@ from re import match, compile
 from xml.dom.minidom import parseString
 from json import loads
 
-# import additional_senders
 from db_api import DB_API
 
 
@@ -105,7 +108,6 @@ PRESENT_TEMPLATE = '<execute uid="%s" auth_key="%s" sid="%s">' \
 
 PRESENTS = ["gold", "money", "marine", "food", "units", "fuel", "schemes", "commando"]
 
-# STAT_USER = {"uid": "mr:17273545492366541080", "auth": "77fdcf629194f89ff767e79d6843cedf"}
 STAT_USER = {"uid": "mr:16365741323372014699", "auth": "5914b4525bae999a2da5c1f60ced1ff2"}
 FREEDOMS = ["25c139b2f8c2420a5c1130c6f9a6f3ce"]
 
@@ -357,7 +359,6 @@ class Utils(object):
 
         # Order parts for unit if need
         require = UNITS[unit_type].get("requirements", [])
-        # if require and self.__getattribute__("%s_%s_parts" % (uid, unit_type)):
         for item in require:
             if int(getattr(self, "%s_parts" % uid, {}).get(item, 0)) > 2:
                 continue
@@ -371,7 +372,6 @@ class Utils(object):
         self.__setattr__(uid, Event())
         for item in ARMY:
             self.__setattr__("%s_%s" % (uid, item), int(info["order"][item]))
-            # self.__setattr__("%s_%s_parts" % (uid, item), bool(info["order"].get("%s_parts" % item)))
         self.__setattr__("%s_parts" % uid, info["parts"])
         self.__setattr__("%s_trade_time" % uid, 0)
 
@@ -626,7 +626,6 @@ class Utils(object):
 
             for item in list(set(current) - set(saved)):
                 self.add_participant(uid=item, ptype="DYNAMIC")
-                # db.upsert_data(table="PARTICIPANT", data={"UID": item, "TYPE": "DYNAMIC"})
 
         except Exception, err:
             self.logger.error("Error during update clan participants:\n<%s>" % err)
@@ -951,7 +950,6 @@ class Utils(object):
                                                                      condition="UID like '%s%%'" % net)]
 
                 locals()[net] = {"daily": add_recipient, "event": add_recipient}
-                # locals()[net] = {"daily": add_recipient.get(net, []), "event": add_recipient.get(net, [])}
 
                 db_sender = [{user["UID"]: user["AUTH"]}
                              for user in db.get_data(table="PARTICIPANT", multiple=True,
@@ -960,12 +958,6 @@ class Utils(object):
                 archive_sender = [{user["UID"]: user["AUTH"]}
                                   for user in db.get_data(table="ARCHIVE", multiple=True,
                                                           condition="AUTH is not NULL and UID like '%s%%'" % net)]
-
-                # file_sender = []
-                # for item in getattr(additional_senders, net.upper()).split():
-                #     if item.strip() == "":
-                #         continue
-                #     file_sender.append({(item.split(";")[0]).strip(): (item.split(";")[1]).strip()})
 
                 senders.update({net: self.list_unique(db_sender + archive_sender)})
 

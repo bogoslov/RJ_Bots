@@ -45,7 +45,6 @@ class Crisis_View():
                             request.session['is_daily'] = True
 
                         request.session["is_leader"] = data.get("is_leader", False)
-                        # request.session["is_leader"] = True
 
                         if uid not in RUNNING_INFO.keys():
                             data.update({"is_run": False, "is_attack": False})
@@ -53,11 +52,6 @@ class Crisis_View():
                             temp = RUNNING_INFO[uid]
                             temp.update(data)
                             data = temp
-                            # Update timeout
-                            # data.update({"left_time": self.utils.get_remaining_time(uid)})
-
-                            # Update information about units order
-                            # data.update(getattr(self.utils, "%s_order" % uid, {}))
 
                         RUNNING_INFO.update({uid: data})
                         context.update(data)
@@ -243,8 +237,6 @@ class Crisis_View():
         if request.method == "POST":
             if "start" in request.POST:
                 try:
-                    # print dict(request.POST)
-                    # print request.POST.get("city")
                     context.update({"is_attack": True, "selected_city": request.POST.get("city")})
                     RUNNING_INFO.update({uid: context})
                     self.utils.start_city_attack(uid, context)
@@ -259,8 +251,6 @@ class Crisis_View():
         return render_to_response("crisis/city.html",
                                   context,
                                   context_instance=RequestContext(request))
-
-        # return self.about(request)
 
     def statistics(self, request):
         """ Clan participants weekly statistics """

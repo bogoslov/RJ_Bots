@@ -9,15 +9,12 @@ Author : Aleksey Bogoslovskyi
 import os
 import sqlite3
 
-# DATABASE = os.path.join(settings.PROJECT_ROOT, settings.STATIC_ROOT, "crisis.db")
 try:
     from django.conf import settings
     DATABASE = os.path.join(settings.PROJECT_ROOT, "static", "crisis.db")
 except:
     DATABASE = os.path.join(os.path.realpath(os.path.dirname(__file__)), "../static/crisis.db")
 
-
-# ALTER TABLE participant ADD COLUMN TRADE_ORDER TEXT DEFAULT '{}';
 
 TABLES = """
 CREATE TABLE IF NOT EXISTS USERS(
@@ -188,8 +185,3 @@ class DB_API(object):
 
 if __name__ == '__main__':
     api = DB_API()
-
-
-"""
-insert into statistics (uid) select uid from participant where TYPE=='DYNAMIC';
-"""
