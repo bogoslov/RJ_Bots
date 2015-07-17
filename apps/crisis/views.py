@@ -88,6 +88,12 @@ class Crisis_View():
                         "parts_list": PARTS,
                         "detail_info_list": DETAIL_INFO})
 
+        if "priority" not in context:
+            priority = {}
+            for item in ARMY:
+                priority.update({item: 1})
+            context.update({"priority": priority})
+
         if context.get("is_run", False):
             context.update({"left_time": self.utils.get_remaining_time(uid),
                             "order": self.utils.get_current_unit_order(uid)})
@@ -109,7 +115,7 @@ class Crisis_View():
 
         if request.method == "POST":
             if "start" in request.POST:
-                order = {}
+                order, priority = {}, {}
                 data = dict(request.POST)
 
                 for item in ARMY:
@@ -117,10 +123,16 @@ class Crisis_View():
                         count = int(data.get(item, [''])[0])
                     except:
                         count = 0
+                    try:
+                        prior = int(data.get("%s_priority" % item, [''])[0])
+                    except:
+                        prior = 1
                     order.update({item: count})
+                    priority.update({item: prior})
 
                 context.update({"is_run": True,
                                 "order": order,
+                                "priority": priority,
                                 "left_time": self.utils.get_remaining_time(uid)})
 
                 RUNNING_INFO.update({uid: context})

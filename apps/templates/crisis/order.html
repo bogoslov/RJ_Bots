@@ -114,36 +114,75 @@
                             </tr>
                             <tr>
                                 <td><img src="{% static "img/crisis/infantry/soldier_64x64.png" %}" alt="Soldier"><span class="label label-success">{{ current_army.soldier }}</span></td>
-                                <td><input name="soldier" type="text" placeholder="{{ order.soldier }}"></td>
-{#                                <td></td>#}
+                                <td><input name="soldier" type="text" placeholder="{{ order.soldier }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="soldier_priority" min="1" max="4" value="{{ priority.soldier }}" >
+                                </td>
                                 <td><img src="{% static "img/crisis/armor/base_tank_64x64.png" %}" alt="Tank"><span class="label label-success">{{ current_army.base_tank }}</span></td>
-                                <td><input name="base_tank" type="text" placeholder="{{ order.base_tank }}"></td>
+                                <td><input name="base_tank" type="text" placeholder="{{ order.base_tank }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="base_tank_priority" min="1" max="2" value="{{ priority.base_tank }}">
+                                </td>
                                 <td><img src="{% static "img/crisis/support/base_artillery_64x64.png" %}" alt="Base Artillery"><span class="label label-success">{{ current_army.base_artillery }}</span></td>
-                                <td><input name="base_artillery" type="text" placeholder="{{ order.base_artillery }}"></td>
+                                <td><input name="base_artillery" type="text" placeholder="{{ order.base_artillery }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="base_artillery_priority" min="1" max="5" value="{{ priority.base_artillery }}">
+                                </td>
                             </tr>
                             <tr>
                                 <td><img src="{% static "img/crisis/infantry/gunner_64x64.png" %}" alt="Gunner"><span class="label label-success">{{ current_army.gunner }}</span></td>
-                                <td><input name="gunner" type="text" placeholder="{{ order.gunner }}"></td>
+                                <td><input name="gunner" type="text" placeholder="{{ order.gunner }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="gunner_priority" min="1" max="4" value="{{ priority.gunner }}">
+                                </td>
                                 <td><img src="{% static "img/crisis/armor/jeep_64x64.png" %}" alt="Jeep"><span class="label label-success">{{ current_army.jeep }}</span></td>
-                                <td><input name="jeep" type="text" placeholder="{{ order.jeep }}"></td>
+                                <td><input name="jeep" type="text" placeholder="{{ order.jeep }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="jeep_priority" min="1" max="2" value="{{ priority.jeep }}">
+                                </td>
                                 <td><img src="{% static "img/crisis/support/artillery_64x64.png" %}" alt="Artillery"><span class="label label-success">{{ current_army.artillery }}</span></td>
-                                <td><input name="artillery" type="text" placeholder="{{ order.artillery }}"></td>
+                                <td><input name="artillery" type="text" placeholder="{{ order.artillery }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="artillery_priority" min="1" max="5" value="{{ priority.artillery }}">
+                                </td>
                             </tr>
                             <tr>
                                 <td><img src="{% static "img/crisis/infantry/sniper_64x64.png" %}" alt="Sniper"><span class="label label-success">{{ current_army.sniper }}</span></td>
-                                <td><input name="sniper" type="text" placeholder="{{ order.sniper }}"></td>
+                                <td><input name="sniper" type="text" placeholder="{{ order.sniper }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="sniper_priority" min="1" max="4" value="{{ priority.sniper }}">
+                                </td>
                                 <td></td>
                                 <td></td>
                                 <td><img src="{% static "img/crisis/support/artillery_cassete_64x64.png" %}" alt="Artillery Cassete"><span class="label label-success">{{ current_army.artillery_cassete }}</span></td>
-                                <td><input name="artillery_cassete" type="text" placeholder="{{ order.artillery_cassete }}"></td>
+                                <td><input name="artillery_cassete" type="text" placeholder="{{ order.artillery_cassete }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="artillery_cassete_priority" min="1" max="5" value="{{ priority.artillery_cassete }}">
+                                </td>
                             </tr>
                             <tr>
                                 <td><img src="{% static "img/crisis/infantry/thrower_64x64.png" %}" alt="Thrower"><span class="label label-success">{{ current_army.thrower }}</span></td>
-                                <td><input name="thrower" type="text" placeholder="{{ order.thrower }}"></td>
+                                <td><input name="thrower" type="text" placeholder="{{ order.thrower }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="thrower_priority" min="1" max="4" value="{{ priority.thrower }}">
+                                </td>
                                 <td></td>
                                 <td></td>
                                 <td><img src="{% static "img/crisis/support/artillery_emp_64x64.png" %}" alt="Artillery EMP"><span class="label label-success">{{ current_army.artillery_emp }}</span></td>
-                                <td><input name="artillery_emp" type="text" placeholder="{{ order.artillery_emp }}"></td>
+                                <td><input name="artillery_emp" type="text" placeholder="{{ order.artillery_emp }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="artillery_emp_priority" min="1" max="5" value="{{ priority.artillery_emp }}">
+                                </td>
                             </tr>
                             <tr>
                                 <td></td>
@@ -151,7 +190,11 @@
                                 <td></td>
                                 <td></td>
                                 <td><img src="{% static "img/crisis/support/artillery_antitank_64x64.png" %}" alt="Artillery Antitank"><span class="label label-success">{{ current_army.artillery_antitank }}</span></td>
-                                <td><input name="artillery_antitank" type="text" placeholder="{{ order.artillery_antitank }}"></td>
+                                <td><input name="artillery_antitank" type="text" placeholder="{{ order.artillery_antitank }}">
+                                    <span class="label label-success">Low</span>
+                                    <span class="label label-important">High</span>
+                                    <input type="range" name="artillery_antitank_priority" min="1" max="5" value="{{ priority.artillery_antitank }}">
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -162,6 +205,9 @@
                     <div class="alert alert-success">
                         Запчасти для производства войск будут создаваться автоматически,
                         если их недостаточно для создания выбранного типа войск
+                        <br>
+                        <br>
+                        Ползунком можно регулировать приоритет создания выбранного типа войск
                     </div>
                 </div>
 

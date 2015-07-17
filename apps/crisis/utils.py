@@ -375,6 +375,11 @@ class Utils(object):
         self.__setattr__("%s_parts" % uid, info["parts"])
         self.__setattr__("%s_trade_time" % uid, 0)
 
+        # Determine units order sequence using priority
+        unit_order_sequence = list(sorted(info.get("priority", {}).keys(),
+                                          key=info.get("priority", {}).get,
+                                          reverse=True))
+
         while not self.__getattribute__(uid).is_set():
             info.update({"parts": getattr(self, "%s_parts" % uid)})
             if self.order_lock:
@@ -383,7 +388,9 @@ class Utils(object):
             else:
                 try:
                     timeout = RESOURCE_TIMEOUT  # By default use resource gathering timeout (2 hour)
-                    for item in ARMY:
+                    # for item in ARMY:
+                    for item in unit_order_sequence:
+
                         order_count = self.__getattribute__("%s_%s" % (uid, item))
                         if order_count >= int(UNITS[item].get("count", 1)):
 
