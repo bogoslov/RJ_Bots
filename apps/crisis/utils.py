@@ -87,16 +87,19 @@ ITEM_TEMPLATE = '<start_contract uid="%s" auth_key="%s" sid="%s">' \
 RESOURCE_TEMPLATE = '<execute uid="%s" auth_key="%s" sid="%s"><arguments/>' \
                     '<command>%s_factory_reset_script</command></execute>'
 
-INTERACTION = {"daily": '<interaction uid="%s" auth_key="%s" sid="%s">'
-                        '<type>gift_scheme</type>'
-                        '<group>schemes_gift_interaction_group</group>'
-                        '<friend>%s</friend>'
-                        '</interaction>',
-               "event": '<interaction uid="%s" auth_key="%s" sid="%s">'
-                        '<type>event_scheme</type>'
-                        '<group>schemes_event_interaction_group</group>'
-                        '<friend>%s</friend>'
-                        '</interaction>'}
+INTERACTION = {"daily":     '<interaction uid="%s" auth_key="%s" sid="%s">'
+                            '<type>gift_scheme</type>'
+                            '<group>schemes_gift_interaction_group</group>'
+                            '<friend>%s</friend>'
+                            '</interaction>',
+               "event":     '<interaction uid="%s" auth_key="%s" sid="%s">'
+                            '<type>event_scheme</type>'
+                            '<group>schemes_event_interaction_group</group>'
+                            '<friend>%s</friend>'
+                            '</interaction>',
+               "friend":    '<accept_friendship uid="%s" auth_key="%s" sid="%s">'
+                            '<friend>%s</friend>'
+                            '</accept_friendship>'}
 
 PRESENT_TEMPLATE = '<execute uid="%s" auth_key="%s" sid="%s">' \
                    '<command>input_data_script</command>' \
@@ -108,7 +111,7 @@ PRESENT_TEMPLATE = '<execute uid="%s" auth_key="%s" sid="%s">' \
 
 PRESENTS = ["gold", "money", "marine", "food", "units", "fuel", "schemes", "commando"]
 
-STAT_USER = {"uid": "mr:16365741323372014699", "auth": "5914b4525bae999a2da5c1f60ced1ff2"}
+STAT_USER = {"uid": "mr:16365741323372014699"}
 FREEDOMS = ["25c139b2f8c2420a5c1130c6f9a6f3ce"]
 
 
@@ -1008,6 +1011,63 @@ class Utils(object):
             print "Sending schemas finished"
         except Exception, err:
             print "Error during send interaction: %s" % err
+        finally:
+            db.connection.close()
+
+    def accept_friendship(self):
+        """ Send friendship requests for participants """
+        db = DB_API()
+        try:
+            res = db.get_data(table="PARTICIPANT", multiple=True)
+
+            senders = {}
+            for net in NETS:
+                add_recipient = [user["UID"] for user in db.get_data(table="ADD_RECIPIENTS",
+                                                                     multiple=True,
+                                                                     condition="UID like '%s%%'" % net)]
+
+                locals()[net] = {"friend": add_recipient}
+
+                db_sender = [{user["UID"]: user["AUTH"]}
+                             for user in db.get_data(table="PARTICIPANT", multiple=True,
+                                                     condition="AUTH is not NULL and UID like '%s%%'" % net)]
+
+                archive_sender = [{user["UID"]: user["AUTH"]}
+                                  for user in db.get_data(table="ARCHIVE", multiple=True,
+                                                          condition="AUTH is not NULL and UID like '%s%%'" % net)]
+
+                senders.update({net: self.list_unique(db_sender + archive_sender)})
+
+            for user in res:
+                uid = user.get("UID")
+                if uid.startswith("br"):
+                    continue
+                temp = list(locals().get(uid[:2])["friend"])
+                temp.append(uid)
+                locals().get(uid[:2]).update({"friend": temp})
+
+            for net in NETS:
+                for sender_params in senders[net]:
+                    sender_uid = sender_params.keys()[0]
+                    sender_auth = sender_params.values()[0]
+
+                    flag, info = self.get_participant_info(sender_uid, sender_auth, check_avail=False)
+                    if not flag:
+                        continue
+                    try:
+                        sid = info.get("sid")
+                        for recipient in locals()[net].get("friend"):
+                            if sender_uid == recipient:
+                                continue
+                                # print "Send %s schema from %s to %s" % (schema_type, sender_uid, recipient)
+                            self.send_request("%s/accept_friendship" % ENDPOINT,
+                                              INTERACTION["friend"] % (sender_uid, sender_auth, sid, recipient))
+                            sleep(0.5)
+                    except Exception, err:
+                        print "Error during accept friendship from user <%s>: %s" % (sender_uid, err)
+            print "Friendship accepting finished"
+        except Exception, err:
+            print "Error during accept friendship: %s" % err
         finally:
             db.connection.close()
 
