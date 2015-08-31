@@ -12,7 +12,7 @@ PROJECT_ROOT = os.path.realpath(os.path.dirname(__file__))
 SITE_HOME = ""
 
 ADMINS = (
-    ('Aleksey Bogoslovskyi', 'Aleksey_Bogoslovsky@priocom.com', 'Software developer'),
+    ('Aleksey Bogoslovskyi', 'alex.bogoslovskyi@gmail.com', 'Software developer'),
 )
 
 MANAGERS = ADMINS

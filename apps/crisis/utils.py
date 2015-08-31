@@ -13,12 +13,12 @@ sys.setdefaultencoding('utf8')
 import urllib2
 import logging
 from time import sleep, time
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from random import choice
 from threading import Thread, Event
 from re import match, compile
 from xml.dom.minidom import parseString
-from json import loads
+from json import loads, dumps
 
 from db_api import DB_API
 
@@ -112,6 +112,7 @@ PRESENT_TEMPLATE = '<execute uid="%s" auth_key="%s" sid="%s">' \
 PRESENTS = ["gold", "money", "marine", "food", "units", "fuel", "schemes", "commando"]
 
 STAT_USER = {"uid": "mr:16365741323372014699"}
+GLOBAL_USER = {"uid": "vk:12718015"}
 FREEDOMS = ["25c139b2f8c2420a5c1130c6f9a6f3ce"]
 
 
@@ -200,8 +201,9 @@ class Utils(object):
                     result.update({"sid": sid})
                 except:
                     pass
+
                 army_mask = ["card_%s_count_item" % unit for unit in ARMY]
-                resource, parts, entity, current_army, detail_info, statistic = {}, {}, {}, {}, {}, {}
+                resource, parts, entity, current_army, detail_info, statistic, artefacts = {}, {}, {}, {}, {}, {}, self.get_default_artefactes_info()
                 for item in dom.getElementsByTagName("item"):
                     if item.attributes["type"].value in RESOURCES:
                         resource.update({item.attributes["type"].value: item.attributes["count"].value})
@@ -217,12 +219,18 @@ class Utils(object):
                         current_army.update({str(item.attributes["type"].value)[5:-11]:
                                             item.attributes["count"].value})
 
+                for item in dom.getElementsByTagName("timing"):
+                    if "artefact" in item.attributes["type"].value and "global_cooldown" not in item.attributes["type"].value and "active" not in item.attributes["type"].value:
+                        artefacts.update({datetime.fromtimestamp(int(item.attributes["start_time"].value)).strftime("%d/%m/%Y"): str(item.attributes["type"].value[:-16])})
+
                 result.update({"resource": resource,
                                "entity": entity,
                                "parts": parts,
                                "current_army": current_army,
                                "detail_info": detail_info,
-                               "statistic": statistic})
+                               "statistic": statistic,
+                               "artefacts": artefacts})
+
                 if uid:
                     for item in dom.getElementsByTagName("building"):
                         building_type = item.attributes["type"].value
@@ -263,16 +271,21 @@ class Utils(object):
                 self.update_participant_params(uid, "AUTH", auth)
                 return True, result
         except Exception, err:
-            print err
+            # print err
             self.logger.error("Error during get information about user <%s>. %s" % (uid, err))
             return False, "Error during get information about user <%s>" % uid
 
-    def get_user_information(self, uid):
+    def get_user_information(self, uid, global_user=False):
         """ Get user information using Static User credentials """
         result = {"uid": uid}
         try:
-            stat_uid, stat_auth = self.get_stat_user_info()
-            info = self.get_participant_info(stat_uid, stat_auth)
+            if not global_user:
+                stat_uid, stat_auth = self.get_stat_user_info()
+                check = True
+            else:
+                stat_uid, stat_auth = self.get_stat_user_info(uid=GLOBAL_USER["uid"], table="ARCHIVE")
+                check = False
+            info = self.get_participant_info(stat_uid, stat_auth, check)
             stat_sid = info[1]["sid"]
             data = '<get_user_info uid="%s" auth_key="%s" sid="%s"> <user>%s</user> </get_user_info>' \
                    % (stat_uid, stat_auth, stat_sid, uid)
@@ -357,7 +370,7 @@ class Utils(object):
             for item in parseString(str(response)).getElementsByTagName("item_count_changed"):
                 if item.attributes["type"].value in PARTS:
                     parts.update({item.attributes["type"].value: item.attributes["count"].value})
-            # Update information about parts about gather after order unit
+            # Update information about parts after order unit
             setattr(self, "%s_parts" % uid, parts)
 
         # Order parts for unit if need
@@ -448,11 +461,10 @@ class Utils(object):
         # print "Wait time is %s:%s:%s" % (h, m, s)
         return "%02d:%02d:%02d" % (h, m, s)
 
-    def get_stat_user_info(self):
+    def get_stat_user_info(self, uid=STAT_USER["uid"], table="PARTICIPANT"):
         db = DB_API()
-        uid = STAT_USER["uid"]
         try:
-            res = db.get_data(table="PARTICIPANT", condition="UID='%s'" % uid)
+            res = db.get_data(table=table, condition="UID='%s'" % uid)
             auth = res.get("AUTH", "")
             return uid, auth
         except Exception, err:
@@ -463,7 +475,7 @@ class Utils(object):
     def get_top_clans(self, type_of="honor"):  # honor, rating, influence
         """ Get list of top clans depends in type: honor, rating or influence """
         result = []
-        uid, auth = self.get_stat_user_info()
+        uid, auth = self.get_stat_user_info(uid=GLOBAL_USER["uid"], table="ARCHIVE")
         if self.stat_sid is None:
             info = self.get_participant_info(uid, auth)
             self.stat_sid = info[1]["sid"]
@@ -495,6 +507,7 @@ class Utils(object):
                        "last_clan": item.get("LAST_CLAN"),
                        "last_rating": item.get("LAST_RATING"),
                        "week_percentage": item.get("WEEK_PERCENTAGE"),
+                       "artefacts": loads(item.get("ARTEFACTS")),
                        } for item in res]
         except Exception, err:
             self.logger.error("Error during get weekly clan statistic:\n<%s>" % err)
@@ -509,15 +522,16 @@ class Utils(object):
         try:
             for user in saved_statistics:
                 uid = user.get("uid")
-                current_statistic = self.get_user_information(uid)
+                current_statistic = self.get_user_information(uid=uid, global_user=True)
                 last_clan_win = int(current_statistic.get("statistic", {}).get("clan_pvp_tournament_win_item", 0))
                 last_clan_play = int(current_statistic.get("statistic", {}).get("clan_pvp_tournament_play_item", 0))
                 last_rating = int(current_statistic.get("detail_info", {}).get("rating", 0))
                 week_clan_win = last_clan_win - int(user.get("last_clan_win"))
                 week_clan_play = last_clan_play - int(user.get("last_clan"))
                 week_rating = last_rating - int(user.get("last_rating"))
+                artefacts = user.get("artefacts", {})
                 try:
-                    week_percentage = round(100 * float(week_clan_win) / week_clan_play , 2)
+                    week_percentage = round(100 * float(week_clan_win) / week_clan_play, 2)
                 except:
                     week_percentage = 0.0
                     # print user.get("name").encode('utf-8'), week_clan_win, week_clan_play, week_rating
@@ -529,15 +543,56 @@ class Utils(object):
                                                          "WEEK_CLAN_WIN": week_clan_win,
                                                          "WEEK_CLAN": week_clan_play,
                                                          "WEEK_RATING": week_rating,
-                                                         "WEEK_PERCENTAGE": week_percentage})
+                                                         "WEEK_PERCENTAGE": week_percentage,
+                                                         "ARTEFACTS": dumps(artefacts)})
         except Exception, err:
-            print err
+            # print err
             self.logger.error("Error during update weekly clan statistic:\n<%s>" % err)
         finally:
             db.connection.close()
 
-    def get_clan_participant(self, clan_id=FREEDOMS[0]):
+    def get_artefacts_dates(self):
+        dates = self.get_statistics()[0]["artefacts"].keys()
+        return sorted(dates, key=lambda x: int(datetime.strptime(x, '%d/%m/%Y').strftime("%s")))
 
+    def get_default_artefactes_info(self, days=0):
+        """  """
+        result = {}
+        today = date.today() - timedelta(days=days)
+        for i in xrange(0, 3):
+            data = today - timedelta(days=i)
+            result.update({"%02d/%02d/%04d" % (data.day, data.month, data.year): "empty"})
+        return result
+
+    def update_artefats_info(self, days=0):
+        """
+        Update artefacts info
+        start point = today - days
+        """
+        saved_statistics = self.get_statistics()
+        db = DB_API()
+        try:
+            for user in saved_statistics:
+                uid = user.get("uid")
+                current_statistic = self.get_user_information(uid=uid, global_user=True)
+                artefacts = current_statistic.get("artefacts", self.get_default_artefactes_info(days))
+                db.upsert_data(table="STATISTICS", data={"UID": uid,
+                                                         "NAME": user.get("name").encode('utf-8'),
+                                                         "LAST_CLAN_WIN": user.get("last_clan_win"),
+                                                         "LAST_CLAN": user.get("last_clan"),
+                                                         "LAST_RATING": user.get("last_rating"),
+                                                         "WEEK_CLAN_WIN": user.get("week_clan_win"),
+                                                         "WEEK_CLAN": user.get("week_clan"),
+                                                         "WEEK_RATING": user.get("week_rating"),
+                                                         "WEEK_PERCENTAGE": user.get("week_percentage"),
+                                                         "ARTEFACTS": dumps(artefacts)})
+        except Exception, err:
+            # print err
+            self.logger.error("Error during update artefacts informaion:\n<%s>" % err)
+        finally:
+            db.connection.close()
+
+    def get_clan_participant(self, clan_id=FREEDOMS[0]):
         result = []
         uid, auth = self.get_stat_user_info()
         if self.stat_sid is None:
@@ -642,17 +697,18 @@ class Utils(object):
         finally:
             db.connection.close()
 
-    def add_participant(self, uid, auth=None, ptype="STATIC", daily="OFF"):
+    def add_participant(self, uid, auth=None, ptype="STATIC", daily="OFF", statistic=True):
         """ Manual add clan participant """
         db = DB_API()
         try:
             db.upsert_data(table="PARTICIPANT", data={"UID": uid, "AUTH": auth, "TYPE": ptype, "DAILY_MERC": daily})
-            info = self.get_user_information(uid)
-            db.upsert_data(table="STATISTICS", data={"UID": uid,
-                                                     "NAME": info.get("name").encode('utf-8'),
-                                                     "LAST_RATING": int(info.get("detail_info", {}).get("rating", 0)),
-                                                     "LAST_CLAN": int(info.get("statistic", {}).get("clan_pvp_tournament_play_item", 0)),
-                                                     "LAST_CLAN_WIN": int(info.get("statistic", {}).get("clan_pvp_tournament_win_item", 0))})
+            if statistic:
+                info = self.get_user_information(uid)
+                db.upsert_data(table="STATISTICS", data={"UID": uid,
+                                                         "NAME": info.get("name").encode('utf-8'),
+                                                         "LAST_RATING": int(info.get("detail_info", {}).get("rating", 0)),
+                                                         "LAST_CLAN": int(info.get("statistic", {}).get("clan_pvp_tournament_play_item", 0)),
+                                                         "LAST_CLAN_WIN": int(info.get("statistic", {}).get("clan_pvp_tournament_win_item", 0))})
         finally:
             db.connection.close()
 
@@ -757,7 +813,9 @@ class Utils(object):
     def start_city_attack(self, uid, info):
         """
         """
-        self.logger.info("Start city <%s> attack by user <%s>: " % (info["city_selected"], uid))
+        # self.logger.info("Start city <%s> attack by user <%s>: " % (info["selected_city"], uid))
+        self.logger.info("Start city <%s> attack by user <%s>: " % (self.get_region_cities()[1][int(info["selected_city"].split("_")[0])][int(info["selected_city"].split("_")[1])], uid))
+
         auth = info.get("auth")
         sid = info.get("sid")
         region_id, city_id = info.get("selected_city", "_").split("_")
@@ -789,9 +847,11 @@ class Utils(object):
     def city_attack(self, uid, auth, sid, region_id, city_id):
         """ Attack city """
         setattr(self, "%s_city" % uid, Event())
-
         # Get timeout to city
         timeout = (self.city_info_calldown(uid, auth, sid, city_id, region_id) - 30)
+        h, m, s = humanize_time(timeout)
+        self.logger.info("City <%s> is going to attack after: %02d:%02d:%02d" %
+                         (self.get_region_cities()[1][region_id][city_id], h, m, s))
         getattr(self, "%s_city" % uid).wait(timeout)
         # sleep(timeout)
 
@@ -810,6 +870,7 @@ class Utils(object):
                 elif "internal_error" not in response:
                     self.stop_city_attack(uid)
                 counter += 1
+                self.logger.debug("Attempt: %s" % counter)
                 if counter % 150 == 0:
                     if self.city_info_calldown(uid, auth, sid, city_id, region_id) > 600:
                         self.stop_city_attack(uid)
@@ -841,6 +902,7 @@ class Utils(object):
 
     def stop_city_attack(self, uid):
         """ Stop attack to city """
+        self.logger.info("Stop city attack")
         getattr(self, "%s_city" % uid).set()
         sleep(1)
 
@@ -1148,27 +1210,3 @@ class Utils(object):
                 if plugin:
                     additional = "_plugin"
                     present(plugin)
-
-
-"""
-INSERT INTO STATISTICS (UID, NAME, LAST_CLAN_WIN, LAST_CLAN, LAST_RATING, WEEK_CLAN_WIN, WEEK_CLAN, WEEK_RATING, WEEK_PERCENTAGE) VALUES
-    ('vk:15453786', 'Ваня Патруц', 1023, 1671, 20818, 39, 62, 430, 62.90),
-    ('vk:42083943', 'Тарас Жемелко', 639, 961, 30375, 24, 38, 979, 63.16),
-    ('mr:672222039225022877', 'Константин Кабанов', 732, 1168, 18778, 43, 65, 541, 66.15),
-    ('vk:215793727', 'Алексей Стуков', 957, 1538, 13230, 42, 59, 321, 71.19),
-    ('br:39150', 'Олег Филипов', 346, 569, 14383, 18, 28, 646, 64.29),
-    ('vk:65927701', 'Вадим Иванов', 563, 799, 15224, 19, 26, 350, 73.08),
-    ('vk:3818838', 'Алексей Сибиряев', 390, 572, 12522, 5, 9, 560, 55.56),
-    ('vk:1761241', 'Сергей Введенский', 642, 1017, 10423, 18, 27, 215, 66.67),
-    ('vk:9630540', 'Ян Ярмолович', 443, 582, 7036, 20, 23, 228, 86.96),
-    ('vk:226723848', 'Acc Gaming', 659, 985, 11440, 26, 41, 301, 63.41),
-    ('od:81604620507', 'Сергей Харинский', 423, 718, 10829, 10, 16, 266, 62.50),
-    ('od:519923501423', 'Евгений Мачехин', 388, 663, 9436, 13, 19, 267, 68.42),
-    ('od:563216788409', 'Александр Васильев', 440, 759, 13074, 29, 58, 382, 50.00),
-    ('mr:13725612745186471471', 'Евгений Федюшкин', 198, 303, 9138, 6, 10, 124, 60.00),
-    ('od:560731711425', 'СЕРГЕЙ БОКОВОЙ', 534, 1200, 10038, 21, 38, 202, 55.26),
-    ('od:573098935852', 'Алексей Соловьев', 397, 964, 6596, 16, 37, 224, 43.24),
-    ('vk:8457405', 'Василий Воробьёв', 445, 660, 9243, 17, 24, 204, 70.83),
-    ('vk:155076055', 'Madara In', 551, 859, 6207, 18, 24, 226, 75.00),
-    ('vk:165361929', 'Станислав Саутин', 356, 569, 5080, 7, 14, 183, 50.00);
-"""

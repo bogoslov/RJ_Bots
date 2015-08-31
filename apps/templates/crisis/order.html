@@ -213,13 +213,21 @@
 
             </div>
             <hr>
-            {% if is_run %}
-                <button type="submit" name="start" class="btn btn-success" disabled>Start</button>
-                <button type="submit" name="stop" class="btn btn-danger">Stop</button>
-            {% else %}
-                <button type="submit" name="start" class="btn btn-success">Start</button>
-                <button type="submit" name="stop" class="btn btn-danger" disabled>Stop</button>
-            {% endif %}
+            <div class="span15">
+                <div class="alert alert-error ">
+                    <b>ВАЖНО!!!</b> На время игры необходимо останавливать сбор ресурсов/создание войск.
+                    Особенно это касается моментов участия в PvP боях (<i>Битва За Алмазы, Операции, Клановые Войны, Зачистка Пустошей</i>)
+                    <br>
+                </div>
+                {% if is_run %}
+                    <button type="submit" name="start" class="btn btn-success" disabled>Start</button>
+                    <button type="submit" name="stop" class="btn btn-danger">Stop</button>
+                {% else %}
+                    <button type="submit" name="start" class="btn btn-success">Start</button>
+                    <button type="submit" name="stop" class="btn btn-danger" disabled>Stop</button>
+                {% endif %}
+
+            </div>
         </form>
     </div>
 {% endblock %}

@@ -272,7 +272,8 @@ class Crisis_View():
                    "is_leader": request.session.get("is_leader", False),
                    }
 
-        context.update({"statistics": self.utils.get_statistics()})
+        context.update({"statistics": self.utils.get_statistics(),
+                        "dates": self.utils.get_artefacts_dates()})
         return render_to_response("crisis/statistics.html",
                                   context,
                                   context_instance=RequestContext(request))

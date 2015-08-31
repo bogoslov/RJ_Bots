@@ -14,8 +14,16 @@ if __name__ == '__main__':
     utils = Utils()
     # utils.update_participant()
     db = DB_API()
+    utils.update_artefats_info()
+
+    # current_statistic = utils.get_user_information(uid="vk:226723848", global_user=True)
+    # artefacts = current_statistic.get("artefacts", utils.get_default_artefactes_info())
+    # print artefacts
+
+    # print sorted(utils.get_default_artefactes_info())
     # db.create_tables()
     # utils.update_statistics()
+    # utils.get_participants_present()
 
     # res = db.get_data(table="STATISTICS", multiple=True)
     # for item in res:
@@ -116,7 +124,7 @@ if __name__ == '__main__':
     # print result
     # utils.update_users_clans()
     # utils.update_participant()
-    # utils.add_participant(uid="vk:2342994")
+    # utils.add_participant(uid="vk:155076055", auth="be79cca464f64faae1472c16c5011bce", daily="sniper")
     # utils.add_participant(uid="mr:17273545492366541080", auth="77fdcf629194f89ff767e79d6843cedf")
     # for item in change_default_time(TIMER, "1800"):
     #     print item
@@ -134,5 +142,3 @@ if __name__ == '__main__':
     # print "SID", sid
     # print utils.get_resource(sid, 592)
     # utils.set_resource(sid, "contract_stone_05", "9")
-
-
