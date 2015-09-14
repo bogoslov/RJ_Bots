@@ -220,6 +220,16 @@ class Crisis_View():
                             temp.append(str(kind))
 
                         entity_order.update({entity: temp})
+                    elif "money_limit" in key:
+                        value = value[0]
+                        if value:
+                            if int(value) < 1000:
+                                money_limit = 1000
+                            else:
+                                money_limit = int(value)
+                        else:
+                            money_limit = 10000
+                        entity_order.update({"money_limit": money_limit})
 
                 context.update({"entity_order": entity_order})
                 self.utils.update_participant_params(uid, "TRADE_ORDER", dumps(entity_order))
@@ -272,8 +282,8 @@ class Crisis_View():
                    "is_leader": request.session.get("is_leader", False),
                    }
 
-        context.update({"statistics": self.utils.get_statistics(),
-                        "dates": self.utils.get_artefacts_dates()})
+        context.update({"statistics": self.utils.get_statistics()})
+                        # "dates": self.utils.get_artefacts_dates()})
         return render_to_response("crisis/statistics.html",
                                   context,
                                   context_instance=RequestContext(request))

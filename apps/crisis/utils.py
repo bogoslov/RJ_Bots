@@ -28,6 +28,7 @@ ENDPOINT = "https://game-r03ww.rjgplay.com/command"
 ENDPOINT_DATA = "https://data-r03ww.rjgplay.com"
 
 # icon links https://media-r03ru.rjgplay.com/resources/common/common/media/icons/items/64x64/rating_64x64.png
+# mercs link https://media-r03ru.rjgplay.com/resources/common/common/media/icons/cards/card_64x64/mercenary_apc_troyan_64x64.png
 
 RESOURCES = ["food", "money", "fuel"]
 ADD_TIMEOUT = 0.5
@@ -37,7 +38,7 @@ DAILY_HOUR = 03
 DAILY_MINUTE = 00
 BLOCK_TIMEOUT = int(30 * 60)  # 30 minutes
 
-MERCS = ["sniper", "tank_abrams", "commando", "soldier"]
+MERCS = ["us_sniper", "us_soldier", "us_commando", "us_tank_abrams", "apc_troyan"]
 
 ENTITY = ["kevlar_fiber", "laser_aimer", "gun_receiver", "powder_charge", "armor_composite", "armor_plate",
           "control_block", "tnt_charge", "rare_item"]
@@ -575,7 +576,11 @@ class Utils(object):
             for user in saved_statistics:
                 uid = user.get("uid")
                 current_statistic = self.get_user_information(uid=uid, global_user=True)
-                artefacts = current_statistic.get("artefacts", self.get_default_artefactes_info(days))
+                cur_artefacts = current_statistic.get("artefacts", self.get_default_artefactes_info(days))
+                saved_artefacts = loads(user.get("artefacts"))
+                for item in cur_artefacts:
+                    if item in saved_artefacts and saved_artefacts[item] != "empty":
+                        cur_artefacts.update({item: saved_artefacts[item]})
                 db.upsert_data(table="STATISTICS", data={"UID": uid,
                                                          "NAME": user.get("name").encode('utf-8'),
                                                          "LAST_CLAN_WIN": user.get("last_clan_win"),
@@ -585,7 +590,7 @@ class Utils(object):
                                                          "WEEK_CLAN": user.get("week_clan"),
                                                          "WEEK_RATING": user.get("week_rating"),
                                                          "WEEK_PERCENTAGE": user.get("week_percentage"),
-                                                         "ARTEFACTS": dumps(artefacts)})
+                                                         "ARTEFACTS": dumps(cur_artefacts)})
         except Exception, err:
             # print err
             self.logger.error("Error during update artefacts informaion:\n<%s>" % err)
@@ -748,49 +753,75 @@ class Utils(object):
             order = info.get("TRADE_ORDER", '{}')
             result = loads(order)
             if not isinstance(result, dict):
-                result = {}
+                result = {"money_limit": 10000}
         except Exception, err:
             self.logger.error("Error during get participant trade order:\n<%s>" % err)
         finally:
             db.connection.close()
             return result
 
-    def buy_trade_products(self, uid, auth, sid):
+    def update_trade(self, uid, auth, sid):
+        """ """
+        data = '<execute uid="%s" auth_key="%s" sid="%s">' \
+               '<command>heliport_shop_instant_refresh_script</command>' \
+               '<arguments/>' \
+               '</execute>' % (uid, auth, sid)
+        response = self.send_request("https://game-r03ww.rjgplay.com/command/execute", data)
+        # if "error" in response:
+        #     print response
+
+    def buy_trade_products(self, uid, auth, sid, money_limit=10000):
         """ Buy products from trade house """
-        try:
-            order = self.get_trade_order(uid)
-            products = []
-            for entity, kinds in order.iteritems():
-                for kind in kinds:
-                    additional = ""
-                    if str(kind) == "gold":
-                        additional = "_real"
-                    products.append(r"%s_pack_\d%s" % (str(entity), additional))
+        money = 0
+        need_buy = True
+        while need_buy:
+            try:
+                order = self.get_trade_order(uid)
+                products = []
+                for entity, kinds in order.iteritems():
+                    if entity == "money_limit":
+                        continue
+                    for kind in kinds:
+                        additional = ""
+                        if str(kind) == "gold":
+                            additional = "_real"
+                        products.append(r"%s_pack_\d%s" % (str(entity), additional))
 
-            combined = "(" + "$)|(".join(products) + "$)"
+                combined = "(" + "$)|(".join(products) + "$)"
 
-            data = '<get_user_info uid="%s" auth_key="%s" sid="%s"> <user>%s</user> </get_user_info>' % (uid, auth, sid, uid)
-            response = self.send_request("%s/get_user_info" % ENDPOINT, data)
-            if response is not None:
-                if "Invalid sid" in response:
+                data = '<get_user_info uid="%s" auth_key="%s" sid="%s"> <user>%s</user> </get_user_info>' % (uid, auth, sid, uid)
+                response = self.send_request("%s/get_user_info" % ENDPOINT, data)
+                if response is not None:
+                    if "Invalid sid" in response:
+                        raise Exception("Invalid SID")
+                    dom = parseString(str(response))
+                    for item in dom.getElementsByTagName("item"):
+                        if match(combined, item.attributes["type"].value):
+                            for i in xrange(int(item.attributes["count"].value)):
+                                data = '<execute uid="%s" auth_key="%s" sid="%s">' \
+                                       '<arguments/>' \
+                                       '<command>%s_buy_script</command>' \
+                                       '</execute>' % (uid, auth, sid, item.attributes["type"].value)
+                                result = self.send_request("%s/execute" % ENDPOINT, data)
+                                if "Invalid sid" in result:
+                                    raise Exception("Invalid SID")
+                                else:
+                                    if "money" in response:
+                                        buy_dom = parseString(str(response))
+                                        for item in buy_dom.getElementsByTagName("item_count_changed"):
+                                            if item.attributes["type"].value == "money":
+                                                money = int(item.attributes["count"].value)
+                    if money < money_limit:
+                        need_buy = False
+                        setattr(self, "%s_trade_time" % uid, int(time()))
+                    else:
+                        self.update_trade(uid, auth, sid)
+                        sleep(0.5)
+            except Exception, err:
+                if "Invalid sid" in err:
                     raise Exception("Invalid SID")
-                dom = parseString(str(response))
-                for item in dom.getElementsByTagName("item"):
-                    if match(combined, item.attributes["type"].value):
-                        for i in xrange(int(item.attributes["count"].value)):
-                            data = '<execute uid="%s" auth_key="%s" sid="%s">' \
-                                   '<arguments/>' \
-                                   '<command>%s_buy_script</command>' \
-                                   '</execute>' % (uid, auth, sid, item.attributes["type"].value)
-                            result = self.send_request("%s/execute" % ENDPOINT, data)
-                            if "Invalid sid" in result:
-                                raise Exception("Invalid SID")
-            setattr(self, "%s_trade_time" % uid, int(time()))
-        except Exception, err:
-            if "Invalid sid" in err:
-                raise Exception("Invalid SID")
-            else:
-                self.logger.error("Error during buy products for user <%s>:\n<%s>" % (uid, err))
+                else:
+                    self.logger.error("Error during buy products for user <%s>:\n<%s>" % (uid, err))
 
     def get_region_cities(self):
         """ Return dict where key = region, value = list of cities in current region """
@@ -980,7 +1011,7 @@ class Utils(object):
 
             daily_order = '<execute uid="%s" auth_key="%s" sid="%s">' \
                           '<arguments/>' \
-                          '<command>daily_quest_merc_us_%s_%s_executer_script</command>' \
+                          '<command>daily_quest_merc_%s_%s_executer_script</command>' \
                           '</execute>' % (uid, auth, sid, merc, level)
             response = self.send_request("%s/execute" % ENDPOINT, daily_order)
 
@@ -988,10 +1019,10 @@ class Utils(object):
                 response = self.send_request("%s/execute" % ENDPOINT, request % (uid, auth, sid))
 
             data1 = '<execute uid="%s" auth_key="%s" sid="%s">' \
-                    '<command>daily_quest_merc_us_%s_%s_submit_script</command>' \
+                    '<command>daily_quest_merc_%s_%s_submit_script</command>' \
                     '<arguments/> </execute>' % (uid, auth, sid, merc, level)
             data2 = '<execute uid="%s" auth_key="%s" sid="%s">' \
-                    '<command>daily_quest_merc_us_%s_%s_reward_quest_submit_script</command>' \
+                    '<command>daily_quest_merc_%s_%s_reward_quest_submit_script</command>' \
                     '<arguments/> </execute>' % (uid, auth, sid, merc, level)
             response = self.send_request("%s/execute" % ENDPOINT, data1)
             response = self.send_request("%s/execute" % ENDPOINT, data2)

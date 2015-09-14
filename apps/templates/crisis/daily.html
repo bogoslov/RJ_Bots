@@ -11,11 +11,11 @@
                     <table class="table" class="table-bordered" style="text-align: center">
                         <tbody>
                             <tr>
-                                <td  colspan="6"><span style="font-family: fantasy; font-size:22px; color: dimgrey">Daily Mercenary</span></td>
+                                <td  colspan="8"><span style="font-family: fantasy; font-size:22px; color: dimgrey">Daily Mercenary</span></td>
                             </tr>
                             <tr>
                                 {% for merc in mercs %}
-                                    <td><img src="{{ STATIC_URL }}img/crisis/daily/mercenary_us_{{ merc }}_64x64.png" alt="{{ merc|capfirst }}"></td>
+                                    <td><img src="{{ STATIC_URL }}img/crisis/daily/mercenary_{{ merc }}_64x64.png" alt="{{ merc|capfirst }}"></td>
                                 {% endfor %}
                             </tr>
                             <tr>
@@ -28,10 +28,10 @@
                                 {% endfor %}
                             </tr>
                             <tr>
-                                <td  colspan="6"><span style="font-family: fantasy; font-size:22px; color: dimgrey">Schemas</span></td>
+                                <td  colspan="8"><span style="font-family: fantasy; font-size:22px; color: dimgrey">Schemas</span></td>
                             </tr>
                             <tr>
-                                <td colspan="3" style="text-align:center">
+                                <td colspan="4" style="text-align:center">
                                     <img src="{{ STATIC_URL }}img/crisis/daily/daily_schema.png" alt="DAILY SCHEMA"><br>
                                     {% if daily_schema %}
                                         <input type="checkbox" name="daily_schema" value="receive" checked="">
@@ -39,7 +39,7 @@
                                         <input type="checkbox" name="daily_schema" value="receive">
                                     {% endif %}
                                 </td>
-                                <td colspan="3" style="text-align:center">
+                                <td colspan="4" style="text-align:center">
                                     <img src="{{ STATIC_URL }}img/crisis/daily/event_schema.png" alt="EVENT SCHEMA"><br>
                                     {% if event_schema %}
                                         <input type="checkbox" name="event_schema" value="receive" checked="">
@@ -49,10 +49,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="6"><span style="font-family: fantasy; font-size:22px; color: dimgrey">Group and Plugin Presents</span></td>
+                                <td colspan="8"><span style="font-family: fantasy; font-size:22px; color: dimgrey">Group and Plugin Presents</span></td>
                             </tr>
                             <tr>
-                                <td colspan="6" style="text-align:center">
+                                <td colspan="8" style="text-align:center">
                                     <img src="{{ STATIC_URL }}img/crisis/daily/present.png" alt="GROUP|PLUGIN PRESENT"><br>
                                     {% if group_plugin %}
                                         <input type="checkbox" name="group_plugin" value="gather" checked="">
@@ -62,7 +62,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="6" style="text-align:center"><button type="submit" name="save" class="btn btn-success">Save</button></td>
+                                <td colspan="8" style="text-align:center"><button type="submit" name="save" class="btn btn-success">Save</button></td>
                             </tr>
 
                         </tbody>
