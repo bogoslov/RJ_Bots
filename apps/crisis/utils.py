@@ -348,7 +348,7 @@ class Utils(object):
             while not "<internal_error>8a35a85ae4cd100c36a90fa421359ad3</internal_error>" in response and i < 5:
                 response = self.send_request("%s/collect_contract" % ENDPOINT, get_order)
                 if "Invalid sid" in response:
-                    raise Exception("Invalid SID")
+                    raise Exception("Invalid sid")
                 if "_items_factory" in building:
                     for item in parseString(str(response)).getElementsByTagName("item_count_changed"):
                         if item.attributes["type"].value in PARTS:
@@ -363,7 +363,7 @@ class Utils(object):
                                      ORDER_TEMPLATE % (uid, auth, sid, "unit", unit_type,
                                                        getattr(self, "%s_%s_factory" % (uid, building_type))))
         if "Invalid sid" in response:
-            raise Exception("Invalid SID")
+            raise Exception("Invalid sid")
 
         if "error" not in response:
             order_count = self.__getattribute__("%s_%s" % (uid, unit_type))
@@ -383,7 +383,7 @@ class Utils(object):
                                          ORDER_TEMPLATE % (uid, auth, sid, "item", item,
                                                            getattr(self, "%s_%s_items_factory" % (uid, building_type))))
             if "Invalid sid" in response:
-                raise Exception("Invalid SID")
+                raise Exception("Invalid sid")
 
     def resource_unit_order(self, uid, info):
         self.__setattr__(uid, Event())
@@ -793,7 +793,7 @@ class Utils(object):
                 response = self.send_request("%s/get_user_info" % ENDPOINT, data)
                 if response is not None:
                     if "Invalid sid" in response:
-                        raise Exception("Invalid SID")
+                        raise Exception("Invalid sid")
                     dom = parseString(str(response))
                     for item in dom.getElementsByTagName("item"):
                         if match(combined, item.attributes["type"].value):
@@ -804,7 +804,7 @@ class Utils(object):
                                        '</execute>' % (uid, auth, sid, item.attributes["type"].value)
                                 result = self.send_request("%s/execute" % ENDPOINT, data)
                                 if "Invalid sid" in result:
-                                    raise Exception("Invalid SID")
+                                    raise Exception("Invalid sid")
                                 else:
                                     if "money" in response:
                                         buy_dom = parseString(str(response))
@@ -819,7 +819,7 @@ class Utils(object):
                         sleep(0.5)
             except Exception, err:
                 if "Invalid sid" in err:
-                    raise Exception("Invalid SID")
+                    raise Exception("Invalid sid")
                 else:
                     self.logger.error("Error during buy products for user <%s>:\n<%s>" % (uid, err))
 
@@ -897,7 +897,7 @@ class Utils(object):
             try:
                 response = self.send_request("%s/global_map_attack" % ENDPOINT, data)
                 if "Invalid sid" in response:
-                    raise Exception("Invalid SID")
+                    raise Exception("Invalid sid")
                 elif "internal_error" not in response:
                     self.stop_city_attack(uid)
                 counter += 1
@@ -1018,11 +1018,13 @@ class Utils(object):
             for request in DAILY:
                 response = self.send_request("%s/execute" % ENDPOINT, request % (uid, auth, sid))
 
+            if merc != "apc_troyan":
+                merc = "merc_" + merc
             data1 = '<execute uid="%s" auth_key="%s" sid="%s">' \
-                    '<command>daily_quest_merc_%s_%s_submit_script</command>' \
+                    '<command>daily_quest_%s_%s_submit_script</command>' \
                     '<arguments/> </execute>' % (uid, auth, sid, merc, level)
             data2 = '<execute uid="%s" auth_key="%s" sid="%s">' \
-                    '<command>daily_quest_merc_%s_%s_reward_quest_submit_script</command>' \
+                    '<command>daily_quest_%s_%s_reward_quest_submit_script</command>' \
                     '<arguments/> </execute>' % (uid, auth, sid, merc, level)
             response = self.send_request("%s/execute" % ENDPOINT, data1)
             response = self.send_request("%s/execute" % ENDPOINT, data2)
