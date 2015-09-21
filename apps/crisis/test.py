@@ -14,7 +14,11 @@ if __name__ == '__main__':
     utils = Utils()
     # utils.update_participant()
     db = DB_API()
-    utils.update_artefats_info()
+    utils.get_present("vk:2342994", "c0a426784e761547e57afcc6d2bbc367", plugin="commando", group="food")
+    utils.get_present("vk:226723848", "f1cba14cf2f44e19acd5b42d142df4a3", plugin="commando", group="food")
+    # utils.get_game_daily("vk:2342994", "c0a426784e761547e57afcc6d2bbc367", "apc_troyan")
+    # utils.get_game_daily("od:563908618090", "3259003bde3431599cc8cf14cfde8281", "us_commando")
+    # utils.update_artefats_info()
 
     # current_statistic = utils.get_user_information(uid="vk:226723848", global_user=True)
     # artefacts = current_statistic.get("artefacts", utils.get_default_artefactes_info())

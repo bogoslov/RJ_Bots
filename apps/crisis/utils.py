@@ -780,6 +780,7 @@ class Utils(object):
                 products = []
                 for entity, kinds in order.iteritems():
                     if entity == "money_limit":
+                        money_limit = int(kinds)
                         continue
                     for kind in kinds:
                         additional = ""
@@ -796,6 +797,10 @@ class Utils(object):
                         raise Exception("Invalid sid")
                     dom = parseString(str(response))
                     for item in dom.getElementsByTagName("item"):
+                        if item.attributes["type"].value == "money":
+                            money = int(item.attributes["count"].value)
+
+                    for item in dom.getElementsByTagName("item"):
                         if match(combined, item.attributes["type"].value):
                             for i in xrange(int(item.attributes["count"].value)):
                                 data = '<execute uid="%s" auth_key="%s" sid="%s">' \
@@ -806,11 +811,12 @@ class Utils(object):
                                 if "Invalid sid" in result:
                                     raise Exception("Invalid sid")
                                 else:
-                                    if "money" in response:
-                                        buy_dom = parseString(str(response))
+                                    if "money" in result:
+                                        buy_dom = parseString(str(result))
                                         for item in buy_dom.getElementsByTagName("item_count_changed"):
                                             if item.attributes["type"].value == "money":
                                                 money = int(item.attributes["count"].value)
+
                     if money < money_limit:
                         need_buy = False
                         setattr(self, "%s_trade_time" % uid, int(time()))
@@ -1008,24 +1014,24 @@ class Utils(object):
                      '<arguments/>'
                      '<command>vip_send_schemas_complete_script</command>'
                      '</execute>']
+            if merc != "apc_troyan":
+                merc = "merc_%s_%s" % (merc, level)
 
             daily_order = '<execute uid="%s" auth_key="%s" sid="%s">' \
                           '<arguments/>' \
-                          '<command>daily_quest_merc_%s_%s_executer_script</command>' \
-                          '</execute>' % (uid, auth, sid, merc, level)
+                          '<command>daily_quest_%s_executer_script</command>' \
+                          '</execute>' % (uid, auth, sid, merc)
             response = self.send_request("%s/execute" % ENDPOINT, daily_order)
 
             for request in DAILY:
                 response = self.send_request("%s/execute" % ENDPOINT, request % (uid, auth, sid))
 
-            if merc != "apc_troyan":
-                merc = "merc_" + merc
             data1 = '<execute uid="%s" auth_key="%s" sid="%s">' \
-                    '<command>daily_quest_%s_%s_submit_script</command>' \
-                    '<arguments/> </execute>' % (uid, auth, sid, merc, level)
+                    '<command>daily_quest_%s_submit_script</command>' \
+                    '<arguments/> </execute>' % (uid, auth, sid, merc)
             data2 = '<execute uid="%s" auth_key="%s" sid="%s">' \
-                    '<command>daily_quest_%s_%s_reward_quest_submit_script</command>' \
-                    '<arguments/> </execute>' % (uid, auth, sid, merc, level)
+                    '<command>daily_quest_%s_reward_quest_submit_script</command>' \
+                    '<arguments/> </execute>' % (uid, auth, sid, merc)
             response = self.send_request("%s/execute" % ENDPOINT, data1)
             response = self.send_request("%s/execute" % ENDPOINT, data2)
             if "internal_error" in response:
